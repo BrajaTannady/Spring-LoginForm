@@ -1,5 +1,8 @@
 package com.example.SpringLoginForm.controller;
 
+import com.example.SpringLoginForm.client.GithubAccess;
+import com.example.SpringLoginForm.client.GithubClient;
+import com.example.SpringLoginForm.client.GithubResponse;
 import com.example.SpringLoginForm.entity.Account;
 import com.example.SpringLoginForm.request.AccountRequest;
 import com.example.SpringLoginForm.response.AccountResponse;
@@ -19,10 +22,25 @@ public class AccountController {
   @Autowired
   private AccountService accountService;
 
-  @GetMapping("/loginAccount")
+  @Autowired
+  private GithubClient githubClient;
+
+  static final String CLIENT_ID = "846573df76da1681488f";
+  static final String CLIENT_SECRET = "4a69a32996f0708fcc3c0cf0f25a911df624a999";
+
+  @GetMapping("/login")
   public AccountResponse loginAccount(@RequestParam String email, String password) {
     Account account = accountService.loginAccount(email, password);
     return Converter.convertAccountToAccountResponse(account);
+  }
+
+  @GetMapping(value = "/loginGithub")
+  public Account messageGithub(String code) {
+    GithubAccess githubAccess = githubClient.getAccessToken(CLIENT_ID, CLIENT_SECRET, code);
+    GithubResponse githubResponse = githubClient.getUserInfo(githubAccess);
+    Account account = Converter.convertGithubResponseToAccount(githubResponse);
+    accountService.registerAccount(account);
+    return account;
   }
 
   @PostMapping("/registerAccount")
@@ -37,7 +55,9 @@ public class AccountController {
   }
 
   @PostMapping("/updateAccount")
-  public BaseResponse updateAccount(@RequestParam String email, String password, @RequestBody AccountRequest request) {
+  public BaseResponse updateAccount(@RequestParam String email,
+      String password,
+      @RequestBody AccountRequest request) {
     Account account = Converter.convertAccountRequestToAccount(request);
     try {
       accountService.updateAccount(email, password, account);

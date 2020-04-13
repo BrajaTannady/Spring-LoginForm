@@ -1,5 +1,6 @@
 package com.example.SpringLoginForm.util;
 
+import com.example.SpringLoginForm.client.GithubResponse;
 import com.example.SpringLoginForm.entity.Account;
 import com.example.SpringLoginForm.request.AccountRequest;
 import com.example.SpringLoginForm.response.AccountResponse;
@@ -24,6 +25,14 @@ public class Converter {
         .name(request.getName())
         .gender(request.getGender())
         .age(request.getAge())
+        .build();
+  }
+
+  public static Account convertGithubResponseToAccount(GithubResponse githubResponse){
+    return Account.builder()
+        .id(githubResponse.getId())
+        .name(githubResponse.getName())
+        .email(githubResponse.getEmail())
         .build();
   }
 }
